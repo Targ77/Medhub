@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -37,11 +36,10 @@ public class HistoricoClinico {
     private String queixaPrincipal;
 
     @NotBlank
-    @Lob
-    @Column(nullable = false)
+    @Column(name = "diagnostico", nullable = false, columnDefinition = "TEXT")
     private String diagnostico;
-
-    @Lob
+    
+    @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
     @ManyToOne(fetch = FetchType.LAZY)

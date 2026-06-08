@@ -11,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
@@ -42,7 +41,7 @@ public class Exame {
     @Column(nullable = false)
     private LocalDate dataRealizacao;
 
-    @Lob
+    @Column(name = "resultado_texto", columnDefinition = "TEXT")
     private String resultadoTexto;
 
     @Enumerated(EnumType.STRING)
