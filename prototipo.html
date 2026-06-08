@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedHub — Protótipo</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --p:#1a7a78;--pd:#0d4f4e;--pl:#c8e6e5;--pm:#2a9d9a;
+      --bg:#f0f7f7;--white:#fff;--border:#c0dada;
+      --text:#1a3333;--muted:#5a7878;
+      --danger:#d64545;--success:#2a9d6a;--warn:#d68a2a;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .hidden{display:none!important}
+
+    .btn{padding:.5rem 1.2rem;border-radius:.5rem;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
+    .btn-primary{background:var(--p);color:#fff}.btn-primary:hover{background:var(--pd)}
+    .btn-outline{background:transparent;border:1.5px solid var(--p);color:var(--p)}.btn-outline:hover{background:var(--pl)}
+    .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{filter:brightness(.9)}
+    .btn-success{background:var(--success);color:#fff}
+    .btn-sm{padding:.3rem .75rem;font-size:.78rem}
+    .btn-ghost{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.8)}.btn-ghost:hover{background:rgba(255,255,255,.2);color:#fff}
+    .w-full{width:100%}
+
+    .badge{padding:.18rem .55rem;border-radius:999px;font-size:.68rem;font-weight:700}
+    .bg{background:#d1fae5;color:#065f46}.br{background:#fee2e2;color:#991b1b}
+    .bb{background:#dbeafe;color:#1e40af}.by{background:#fef3c7;color:#92400e}
+    .bt{background:var(--pl);color:var(--pd)}.bp{background:#ede9fe;color:#5b21b6}
+
+    .fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.9rem}
+    .fg label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .fg input,.fg select,.fg textarea{padding:.58rem .85rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.875rem;outline:none;background:#fff;color:var(--text);transition:border-color .15s}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(26,122,120,.1)}
+    .fg textarea{resize:vertical;min-height:75px}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+    .card{background:#fff;border-radius:.75rem;border:1px solid var(--border);overflow:hidden}
+    .card-head{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .card-body{padding:1.2rem}
+
+    .tw{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.855rem}
+    thead tr{background:var(--bg)}
+    th{padding:.65rem 1rem;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
+    td{padding:.7rem 1rem;border-bottom:1px solid #f0f5f5;vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--bg)}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1rem;margin-bottom:1.4rem}
+    .stat{background:#fff;border-radius:.75rem;padding:1.15rem;border:1px solid var(--border)}
+    .stat-val{font-size:2rem;font-weight:800;color:var(--p)}
+    .stat-lbl{font-size:.78rem;color:var(--muted);margin-top:.15rem}
+
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+    .modal{background:#fff;border-radius:1rem;width:100%;max-width:510px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+    .mh{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .mh h3{font-size:1rem;color:var(--pd)}
+    .mb2{padding:1.35rem}
+    .mf{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.65rem}
+    .xbtn{background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted)}.xbtn:hover{color:var(--danger)}
+
+    .al{padding:.7rem .95rem;border-radius:.5rem;font-size:.855rem;margin-bottom:.9rem}
+    .al-ok{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+    .al-err{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+    .al-info{background:var(--pl);color:var(--pd);border:1px solid #99d4d3}
+
+    .sbar{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;flex:1}
+    .sbar input,.sbar select{padding:.48rem .8rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.855rem;outline:none;background:#fff}
+    .sbar input:focus,.sbar select:focus{border-color:var(--p)}
+    .sbar input{flex:1;min-width:160px}
+
+    /* Tipo resultado radio */
+    .radio-group{display:flex;gap:1rem;margin-bottom:.9rem}
+    .radio-group label{display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.875rem;font-weight:600;color:var(--text)}
+    .radio-group input[type=radio]{accent-color:var(--p);width:16px;height:16px}
+
+    /* LANDING */
+    #scr-landing{min-height:100vh;background:linear-gradient(140deg,var(--pd) 0%,var(--p) 55%,var(--pm) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 1.5rem}
+    .land-hd{text-align:center;margin-bottom:3rem}
+    .land-hd h1{color:#fff;font-size:1.9rem;font-weight:800;margin-top:.9rem}
+    .land-hd p{color:var(--pl);margin-top:.25rem;font-size:.9rem}
+    .role-cards{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;max-width:900px}
+    .role-card{background:#fff;border-radius:1rem;padding:1.8rem 2rem;text-align:center;cursor:pointer;transition:all .2s;border:2px solid transparent;min-width:180px;flex:1;max-width:210px}
+    .role-card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(0,0,0,.22);border-color:var(--pl)}
+    .role-card .ic{font-size:2.2rem;margin-bottom:.65rem}
+    .role-card h2{font-size:1rem;color:var(--pd);margin-bottom:.2rem}
+    .role-card p{font-size:.75rem;color:var(--muted)}
+
+    /* APP LAYOUT */
+    .app{display:flex;min-height:100vh}
+
+    .sb{width:232px;background:var(--pd);flex-shrink:0;display:flex;flex-direction:column}
+    .sb-hd{padding:1.1rem 1.15rem;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:.7rem}
+    .sb-hd .ttl{color:#fff;font-weight:700;font-size:.9rem}
+    .sb-hd .sub{color:var(--pl);font-size:.68rem}
+    .sb-nav{flex:1;padding:.75rem 0}
+    .ni{display:flex;align-items:center;gap:.7rem;padding:.7rem 1.15rem;color:rgba(255,255,255,.68);cursor:pointer;transition:all .15s;font-size:.855rem;border-left:3px solid transparent}
+    .ni:hover{background:rgba(255,255,255,.08);color:#fff}
+    .ni.active{background:rgba(255,255,255,.13);color:#fff;border-left-color:var(--pl)}
+    .ni .nic{font-size:1rem;width:1.15rem;text-align:center}
+    .sb-ft{padding:.9rem 1.15rem;border-top:1px solid rgba(255,255,255,.1)}
+
+    .mc{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:.8rem 1.4rem;display:flex;align-items:center;justify-content:space-between}
+    .topbar h2{font-size:1.05rem;color:var(--pd)}
+    .uchip{display:flex;align-items:center;gap:.45rem;background:var(--bg);border-radius:999px;padding:.28rem .7rem .28rem .35rem;font-size:.78rem;color:var(--muted)}
+    .av{width:26px;height:26px;border-radius:999px;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800}
+    .ca{flex:1;overflow-y:auto;padding:1.4rem}
+
+    .sec{display:none}.sec.active{display:block}
+    .sec-title{font-size:1.18rem;font-weight:800;color:var(--pd);margin-bottom:1.15rem}
+
+    .ci{display:flex;align-items:center;gap:.9rem;padding:.85rem 1rem;border-radius:.625rem;border:1px solid var(--border);margin-bottom:.7rem;background:#fff}
+    .ct{background:var(--pl);color:var(--pd);border-radius:.5rem;padding:.45rem .7rem;text-align:center;min-width:66px;flex-shrink:0}
+    .ct .ch{font-size:1.05rem;font-weight:800}
+    .ct .cm{font-size:.68rem}
+
+    /* PORTAL */
+    #scr-portal{min-height:100vh;background:linear-gradient(140deg,var(--pd) 0%,var(--p) 55%,var(--pm) 100%);display:flex;align-items:center;justify-content:center;padding:2rem}
+    .pc{background:#fff;border-radius:1rem;width:100%;max-width:580px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+    .ph{background:var(--p);padding:1.8rem 2rem;text-align:center;color:#fff}
+    .ph h2{font-size:1.2rem;margin-top:.7rem}
+    .ph p{font-size:.83rem;opacity:.82;margin-top:.2rem}
+    .pb{padding:1.8rem 2rem}
+
+    /* Exame card no portal */
+    .exame-card{border:1px solid var(--border);border-radius:.625rem;padding:1rem;margin-bottom:.65rem;background:var(--bg)}
+    .exame-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+    .exame-resultado{font-size:.875rem;margin-top:.5rem;line-height:1.5}
+    .exame-arquivo{display:flex;align-items:center;gap:.5rem;margin-top:.5rem;padding:.5rem .75rem;background:white;border:1px solid var(--border);border-radius:.5rem;font-size:.82rem}
+
+    @media(max-width:700px){.sb{width:196px}.frow{grid-template-columns:1fr}.role-cards{flex-direction:column}.role-card{min-width:unset;max-width:unset}}
+  </style>
+</head>
+<body>
+
+<!-- ===================================================
+     LANDING — 4 perfis
+=================================================== -->
+<div id="scr-landing">
+  <div class="land-hd">
+    <svg width="108" height="108" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="58" fill="rgba(255,255,255,.15)"/>
+      <circle cx="60" cy="60" r="52" fill="#c8e6e5"/>
+      <path id="a1" d="M22,58 A38,38 0 0,1 98,58" fill="none"/>
+      <text font-size="9.5" fill="#1a7a78" font-weight="800" font-family="Segoe UI,sans-serif" letter-spacing="2.5"><textPath href="#a1" startOffset="7%">GERÊNCIA</textPath></text>
+      <path id="a2" d="M22,64 A38,38 0 0,0 98,64" fill="none"/>
+      <text font-size="9.5" fill="#1a7a78" font-weight="800" font-family="Segoe UI,sans-serif" letter-spacing="5"><textPath href="#a2" startOffset="14%">MÉDICA</textPath></text>
+      <text x="60" y="55" text-anchor="middle" font-size="17" font-weight="900" fill="#1a7a78" font-family="Segoe UI,sans-serif">MEDHUB</text>
+      <rect x="53" y="62" width="14" height="4.5" rx="2" fill="#1a7a78"/>
+      <rect x="57.75" y="57.5" width="4.5" height="14" rx="2" fill="#1a7a78"/>
+    </svg>
+    <h1>MedHub</h1>
+    <p>Sistema de Gerência Médica</p>
+  </div>
+  <div class="role-cards">
+    <div class="role-card" onclick="openApp('admin')">
+      <div class="ic">🛠️</div>
+      <h2>Administrador</h2>
+      <p>Gestão de usuários, perfis e logs do sistema</p>
+    </div>
+    <div class="role-card" onclick="openApp('recep')">
+      <div class="ic">🏥</div>
+      <h2>Recepcionista</h2>
+      <p>Cadastro de pacientes, agendamento e agenda</p>
+    </div>
+    <div class="role-card" onclick="openApp('medico')">
+      <div class="ic">🩺</div>
+      <h2>Médico</h2>
+      <p>Agenda, exames e histórico clínico</p>
+    </div>
+    <div class="role-card" onclick="openApp('portal')">
+      <div class="ic">🗂️</div>
+      <h2>Portal do Paciente</h2>
+      <p>Acesse seus exames com sua chave de acesso</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     ADMINISTRADOR
+=================================================== -->
+<div id="scr-admin" class="hidden app">
+  <aside class="sb">
+    <div class="sb-hd">
+      <svg width="40" height="40" viewBox="0 0 120 120"><circle cx="60" cy="60" r="58" fill="rgba(255,255,255,.1)"/><circle cx="60" cy="60" r="52" fill="#c8e6e5"/><text x="60" y="67" text-anchor="middle" font-size="22" font-weight="900" fill="#1a7a78" font-family="Segoe UI,sans-serif">MH</text></svg>
+      <div><div class="ttl">MedHub</div><div class="sub">Administrador</div></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="ni active" onclick="showSec('admin','dashboard')"><span class="nic">📊</span>Dashboard</div>
+      <div class="ni" onclick="showSec('admin','usuarios')"><span class="nic">👥</span>Usuários</div>
+      <div class="ni" onclick="showSec('admin','medicos')"><span class="nic">🩺</span>Médicos</div>
+      <div class="ni" onclick="showSec('admin','pacientes')"><span class="nic">🧑‍🤝‍🧑</span>Pacientes</div>
+      <div class="ni" onclick="showSec('admin','logs')"><span class="nic">📋</span>Logs de Perfil</div>
+    </nav>
+    <div class="sb-ft"><button class="btn btn-ghost btn-sm w-full" style="justify-content:center" onclick="goHome()">← Sair</button></div>
+  </aside>
+  <div class="mc">
+    <div class="topbar"><h2 id="a-tbar">Dashboard</h2><div class="uchip"><div class="av">AD</div>Admin Sistema</div></div>
+    <div class="ca">
+
+      <div id="admin-dashboard" class="sec active">
+        <p class="sec-title">Visão Geral</p>
+        <div class="stat-grid">
+          <div class="stat"><div class="stat-val" id="st-usr">4</div><div class="stat-lbl">Usuários Cadastrados</div></div>
+          <div class="stat"><div class="stat-val" id="st-med">2</div><div class="stat-lbl">Médicos Ativos</div></div>
+          <div class="stat"><div class="stat-val" id="st-pac">3</div><div class="stat-lbl">Pacientes</div></div>
+          <div class="stat"><div class="stat-val" id="st-con">3</div><div class="stat-lbl">Consultas Hoje</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><strong>Atividade Recente — Logs de Alteração</strong></div>
+          <div class="tw"><table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Alteração</th><th>Feito por</th></tr></thead><tbody id="db-logs"></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="admin-usuarios" class="sec">
+        <p class="sec-title">Gerenciamento de Usuários</p>
+        <div class="card">
+          <div class="card-head">
+            <div class="sbar">
+              <input id="s-usr" type="text" placeholder="Buscar por nome ou e-mail..." oninput="renderUsr()">
+              <select id="f-perfil" onchange="renderUsr()">
+                <option value="">Todos os perfis</option>
+                <option value="MEDICO">Médico</option>
+                <option value="RECEPCIONISTA">Recepcionista</option>
+                <option value="ADMINISTRADOR">Administrador</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openMo('mo-nousr')">+ Novo Usuário</button>
+          </div>
+          <div class="tw"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead><tbody id="usr-tb"></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="admin-medicos" class="sec">
+        <p class="sec-title">Médicos Cadastrados</p>
+        <div class="card">
+          <div class="card-head"><div class="sbar"><input id="s-med" type="text" placeholder="Nome ou especialidade..." oninput="renderMed()"></div></div>
+          <div class="tw"><table><thead><tr><th>Nome</th><th>CRM</th><th>Especialidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="med-tb"></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="admin-pacientes" class="sec">
+        <p class="sec-title">Pacientes Cadastrados</p>
+        <div class="card">
+          <div class="card-head">
+            <div class="sbar"><input id="s-pac-a" type="text" placeholder="Nome ou CPF..." oninput="renderPacA()"></div>
+            <button class="btn btn-primary btn-sm" onclick="openMo('mo-nopac')">+ Novo Paciente</button>
+          </div>
+          <div class="tw"><table><thead><tr><th>Nome</th><th>CPF</th><th>Nasc.</th><th>Telefone</th><th>Chave de Acesso</th></tr></thead><tbody id="pac-a-tb"></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="admin-logs" class="sec">
+        <p class="sec-title">Logs de Alteração de Perfil</p>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Data/Hora</th><th>Usuário Alterado</th><th>Perfil Anterior</th><th>Perfil Novo</th><th>Administrador</th></tr></thead><tbody id="log-tb"></tbody></table></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     RECEPCIONISTA — UC01, UC02, UC03, UC04
+=================================================== -->
+<div id="scr-recep" class="hidden app">
+  <aside class="sb">
+    <div class="sb-hd">
+      <svg width="40" height="40" viewBox="0 0 120 120"><circle cx="60" cy="60" r="58" fill="rgba(255,255,255,.1)"/><circle cx="60" cy="60" r="52" fill="#c8e6e5"/><text x="60" y="67" text-anchor="middle" font-size="22" font-weight="900" fill="#1a7a78" font-family="Segoe UI,sans-serif">MH</text></svg>
+      <div><div class="ttl">MedHub</div><div class="sub">Recepcionista</div></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="ni active" onclick="showSec('recep','agenda')"><span class="nic">📅</span>Agenda</div>
+      <div class="ni" onclick="showSec('recep','pacientes')"><span class="nic">🧑‍🤝‍🧑</span>Pacientes</div>
+    </nav>
+    <div class="sb-ft"><button class="btn btn-ghost btn-sm w-full" style="justify-content:center" onclick="goHome()">← Sair</button></div>
+  </aside>
+  <div class="mc">
+    <div class="topbar"><h2 id="r-tbar">Agenda</h2><div class="uchip"><div class="av">RC</div>Joana Recepcionista</div></div>
+    <div class="ca">
+
+      <!-- UC04 — Visualizar Agenda (todos os médicos) + UC02/UC03 -->
+      <div id="recep-agenda" class="sec active">
+        <p class="sec-title">Agenda de Consultas</p>
+        <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+          <select id="r-ag-med" style="padding:.48rem .8rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.855rem" onchange="renderRAgenda()">
+            <option value="">Todos os médicos</option>
+          </select>
+          <input type="date" id="r-ag-data" style="padding:.48rem .8rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.855rem" oninput="renderRAgenda()">
+          <select id="r-ag-status" style="padding:.48rem .8rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.855rem" onchange="renderRAgenda()">
+            <option value="">Todos os status</option>
+            <option value="AGENDADA">Agendada</option>
+            <option value="CONFIRMADA">Confirmada</option>
+            <option value="CANCELADA">Cancelada</option>
+            <option value="REALIZADA">Realizada</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openConModal('recep')">+ Agendar Consulta</button>
+        </div>
+        <div id="r-ag-list"></div>
+      </div>
+
+      <!-- UC01 — Cadastrar Paciente -->
+      <div id="recep-pacientes" class="sec">
+        <p class="sec-title">Pacientes</p>
+        <div class="card">
+          <div class="card-head">
+            <div class="sbar"><input id="s-pac-r" type="text" placeholder="Buscar por nome ou CPF..." oninput="renderPacR()"></div>
+            <button class="btn btn-primary btn-sm" onclick="openMo('mo-nopac')">+ Cadastrar Paciente</button>
+          </div>
+          <div class="tw"><table><thead><tr><th>Nome</th><th>CPF</th><th>Nasc.</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead><tbody id="pac-r-tb"></tbody></table></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     MÉDICO — UC04, UC05, UC06, UC07
+=================================================== -->
+<div id="scr-medico" class="hidden app">
+  <aside class="sb">
+    <div class="sb-hd">
+      <svg width="40" height="40" viewBox="0 0 120 120"><circle cx="60" cy="60" r="58" fill="rgba(255,255,255,.1)"/><circle cx="60" cy="60" r="52" fill="#c8e6e5"/><text x="60" y="67" text-anchor="middle" font-size="22" font-weight="900" fill="#1a7a78" font-family="Segoe UI,sans-serif">MH</text></svg>
+      <div><div class="ttl">MedHub</div><div class="sub">Dr. Carlos Silva</div></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="ni active" onclick="showSec('medico','agenda')"><span class="nic">📅</span>Agenda</div>
+      <div class="ni" onclick="showSec('medico','pacientes')"><span class="nic">🧑‍🤝‍🧑</span>Pacientes</div>
+      <div class="ni" onclick="showSec('medico','exames')"><span class="nic">🔬</span>Exames</div>
+      <div class="ni" onclick="showSec('medico','historico')"><span class="nic">📝</span>Histórico Clínico</div>
+    </nav>
+    <div class="sb-ft"><button class="btn btn-ghost btn-sm w-full" style="justify-content:center" onclick="goHome()">← Sair</button></div>
+  </aside>
+  <div class="mc">
+    <div class="topbar"><h2 id="m-tbar">Agenda</h2><div class="uchip"><div class="av">DR</div>Dr. Carlos Silva</div></div>
+    <div class="ca">
+
+      <!-- UC04 agenda própria -->
+      <div id="medico-agenda" class="sec active">
+        <p class="sec-title">Minha Agenda</p>
+        <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+          <input type="date" id="ag-data" style="padding:.48rem .8rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.855rem" oninput="renderAg()">
+          <select id="ag-status" style="padding:.48rem .8rem;border:1.5px solid var(--border);border-radius:.5rem;font-size:.855rem" onchange="renderAg()">
+            <option value="">Todos os status</option>
+            <option value="AGENDADA">Agendada</option>
+            <option value="CONFIRMADA">Confirmada</option>
+            <option value="CANCELADA">Cancelada</option>
+            <option value="REALIZADA">Realizada</option>
+          </select>
+        </div>
+        <div id="ag-list"></div>
+      </div>
+
+      <!-- UC07 — Consultar Exames do Paciente -->
+      <div id="medico-pacientes" class="sec">
+        <p class="sec-title">Pacientes — Exames e Histórico</p>
+        <div class="card">
+          <div class="card-head"><div class="sbar"><input id="s-pac-m" type="text" placeholder="Buscar por nome ou CPF..." oninput="renderPacM()"></div></div>
+          <div class="tw"><table><thead><tr><th>Nome</th><th>CPF</th><th>Idade</th><th>Telefone</th><th>Ações</th></tr></thead><tbody id="pac-m-tb"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- UC06 — Cadastrar Resultado de Exame -->
+      <div id="medico-exames" class="sec">
+        <p class="sec-title">Exames</p>
+        <div class="card">
+          <div class="card-head"><strong>Exames Cadastrados</strong><button class="btn btn-primary btn-sm" onclick="openMo('mo-exam')">+ Cadastrar Exame</button></div>
+          <div class="tw"><table><thead><tr><th>Tipo</th><th>Paciente</th><th>Data</th><th>Formato</th><th>Status</th><th>Resultado</th></tr></thead><tbody id="exam-tb"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- UC05 — Registrar Histórico Clínico -->
+      <div id="medico-historico" class="sec">
+        <p class="sec-title">Histórico Clínico</p>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-head"><strong>Registrar Novo Histórico</strong></div>
+          <div class="card-body">
+            <div class="frow">
+              <div class="fg"><label>Paciente</label><select id="hc-pac"><option value="">Selecione...</option></select></div>
+              <div class="fg"><label>Data da Consulta</label><input type="date" id="hc-data"></div>
+            </div>
+            <div class="fg"><label>Queixa Principal</label><input type="text" id="hc-queixa" placeholder="Descreva a queixa principal..."></div>
+            <div class="fg"><label>Diagnóstico</label><textarea id="hc-diag" placeholder="Diagnóstico detalhado..."></textarea></div>
+            <div class="fg"><label>Observações</label><textarea id="hc-obs" placeholder="Observações adicionais (opcional)..."></textarea></div>
+            <div id="hc-al"></div>
+            <button class="btn btn-primary" onclick="regHistorico()">Registrar Histórico</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><strong>Históricos Registrados</strong></div>
+          <div class="tw"><table><thead><tr><th>Data</th><th>Paciente</th><th>Queixa Principal</th><th>Diagnóstico</th></tr></thead><tbody id="hc-tb"></tbody></table></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     PORTAL DO PACIENTE — UC08
+=================================================== -->
+<div id="scr-portal" class="hidden">
+  <div class="pc">
+    <div class="ph">
+      <svg width="64" height="64" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="58" fill="rgba(255,255,255,.15)"/>
+        <circle cx="60" cy="60" r="52" fill="#c8e6e5"/>
+        <path id="a3" d="M22,58 A38,38 0 0,1 98,58" fill="none"/>
+        <text font-size="9.5" fill="#1a7a78" font-weight="800" font-family="Segoe UI,sans-serif" letter-spacing="2.5"><textPath href="#a3" startOffset="7%">GERÊNCIA</textPath></text>
+        <path id="a4" d="M22,64 A38,38 0 0,0 98,64" fill="none"/>
+        <text font-size="9.5" fill="#1a7a78" font-weight="800" font-family="Segoe UI,sans-serif" letter-spacing="5"><textPath href="#a4" startOffset="14%">MÉDICA</textPath></text>
+        <text x="60" y="55" text-anchor="middle" font-size="17" font-weight="900" fill="#1a7a78" font-family="Segoe UI,sans-serif">MEDHUB</text>
+        <rect x="53" y="62" width="14" height="4.5" rx="2" fill="#1a7a78"/>
+        <rect x="57.75" y="57.5" width="4.5" height="14" rx="2" fill="#1a7a78"/>
+      </svg>
+      <h2>Portal do Paciente</h2>
+      <p>Consulte seus exames com sua chave de acesso única</p>
+    </div>
+    <div class="pb" id="pb">
+      <div class="al al-info" style="margin-bottom:1rem">
+        🔑 <strong>Chaves de teste:</strong> <code>chave-maria-2024-abc</code> &nbsp;|&nbsp; <code>chave-joao-2024-xyz</code> &nbsp;|&nbsp; <code>chave-carla-2024-def</code>
+      </div>
+      <div class="fg"><label>Chave de Acesso (UC08)</label><input type="text" id="p-chave" placeholder="Cole ou digite sua chave de acesso..."></div>
+      <div id="p-al"></div>
+      <button class="btn btn-primary w-full" style="justify-content:center" onclick="consultarChave()">Acessar Meus Exames</button>
+      <div style="text-align:center;margin-top:1rem">
+        <a href="#" onclick="goHome();return false" style="color:var(--p);font-size:.8rem;text-decoration:none">← Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     MODAIS
+=================================================== -->
+
+<!-- Novo Usuário -->
+<div id="mo-nousr" class="mo hidden">
+  <div class="modal">
+    <div class="mh"><h3>Cadastrar Novo Usuário</h3><button class="xbtn" onclick="closeMo('mo-nousr')">✕</button></div>
+    <div class="mb2">
+      <div class="frow">
+        <div class="fg"><label>Nome Completo</label><input type="text" id="nu-nome"></div>
+        <div class="fg"><label>CPF</label><input type="text" id="nu-cpf" placeholder="000.000.000-00"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>E-mail</label><input type="email" id="nu-email"></div>
+        <div class="fg"><label>Perfil</label><select id="nu-perfil" onchange="togMedFld()"><option value="RECEPCIONISTA">Recepcionista</option><option value="MEDICO">Médico</option><option value="ADMINISTRADOR">Administrador</option></select></div>
+      </div>
+      <div id="med-flds" class="hidden">
+        <div class="frow">
+          <div class="fg"><label>CRM</label><input type="text" id="nu-crm" placeholder="00000-SP"></div>
+          <div class="fg"><label>Especialidade</label><input type="text" id="nu-esp"></div>
+        </div>
+      </div>
+      <div class="fg"><label>Senha</label><input type="password" id="nu-senha" placeholder="••••••••"></div>
+      <div id="nu-al"></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-nousr')">Cancelar</button><button class="btn btn-primary" onclick="cadUsr()">Cadastrar</button></div>
+  </div>
+</div>
+
+<!-- Alterar Perfil -->
+<div id="mo-altperfil" class="mo hidden">
+  <div class="modal">
+    <div class="mh"><h3>Alterar Perfil do Usuário</h3><button class="xbtn" onclick="closeMo('mo-altperfil')">✕</button></div>
+    <div class="mb2">
+      <div class="al al-info" id="ap-info"></div>
+      <div class="fg"><label>Novo Perfil</label><select id="ap-perfil"><option value="RECEPCIONISTA">Recepcionista</option><option value="MEDICO">Médico</option><option value="ADMINISTRADOR">Administrador</option></select></div>
+      <div class="fg"><label>Administrador Responsável</label><select id="ap-admin"></select></div>
+      <div id="ap-al"></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-altperfil')">Cancelar</button><button class="btn btn-primary" onclick="salvaPerfil()">Confirmar</button></div>
+  </div>
+</div>
+
+<!-- Novo Paciente (UC01) -->
+<div id="mo-nopac" class="mo hidden">
+  <div class="modal">
+    <div class="mh"><h3>Cadastrar Novo Paciente — UC01</h3><button class="xbtn" onclick="closeMo('mo-nopac')">✕</button></div>
+    <div class="mb2">
+      <div class="frow">
+        <div class="fg"><label>Nome Completo</label><input type="text" id="np-nome"></div>
+        <div class="fg"><label>CPF</label><input type="text" id="np-cpf" placeholder="000.000.000-00"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Data de Nascimento</label><input type="date" id="np-nasc"></div>
+        <div class="fg"><label>Telefone</label><input type="text" id="np-tel" placeholder="(00) 00000-0000"></div>
+      </div>
+      <div class="fg"><label>E-mail</label><input type="email" id="np-email"></div>
+      <p style="font-size:.78rem;color:var(--muted);margin-top:-.3rem">Uma chave de acesso única será gerada automaticamente para o paciente.</p>
+      <div id="np-al"></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-nopac')">Cancelar</button><button class="btn btn-primary" onclick="cadPac()">Cadastrar</button></div>
+  </div>
+</div>
+
+<!-- Agendar Consulta (UC02) — com seleção de médico para recepcionista -->
+<div id="mo-con" class="mo hidden">
+  <div class="modal">
+    <div class="mh"><h3>Agendar Consulta — UC02</h3><button class="xbtn" onclick="closeMo('mo-con')">✕</button></div>
+    <div class="mb2">
+      <div class="fg"><label>Paciente</label><select id="nc-pac"></select></div>
+      <div class="fg" id="nc-med-row">
+        <label>Médico</label>
+        <select id="nc-med"></select>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Data</label><input type="date" id="nc-data"></div>
+        <div class="fg"><label>Horário</label><input type="time" id="nc-hora"></div>
+      </div>
+      <div id="nc-al"></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-con')">Cancelar</button><button class="btn btn-primary" onclick="agendarCon()">Agendar</button></div>
+  </div>
+</div>
+
+<!-- Cancelar Consulta (UC03) -->
+<div id="mo-cancel" class="mo hidden">
+  <div class="modal">
+    <div class="mh"><h3>Cancelar Consulta — UC03</h3><button class="xbtn" onclick="closeMo('mo-cancel')">✕</button></div>
+    <div class="mb2">
+      <div class="al al-info" id="cc-info"></div>
+      <div class="fg"><label>Motivo do Cancelamento (obrigatório — RN06)</label><textarea id="cc-motivo" placeholder="Informe o motivo..."></textarea></div>
+      <div id="cc-al"></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-cancel')">Voltar</button><button class="btn btn-danger" onclick="confCancel()">Confirmar Cancelamento</button></div>
+  </div>
+</div>
+
+<!-- Cadastrar Exame (UC06) — com seleção de formato RNF05 -->
+<div id="mo-exam" class="mo hidden">
+  <div class="modal">
+    <div class="mh"><h3>Cadastrar Resultado de Exame — UC06</h3><button class="xbtn" onclick="closeMo('mo-exam')">✕</button></div>
+    <div class="mb2">
+      <div class="frow">
+        <div class="fg"><label>Paciente</label><select id="ne-pac"></select></div>
+        <div class="fg"><label>Tipo de Exame</label><input type="text" id="ne-tipo" placeholder="Ex: Hemograma Completo"></div>
+      </div>
+      <div class="fg"><label>Data de Realização</label><input type="date" id="ne-data"></div>
+      <div class="fg">
+        <label>Tipo de Resultado (RNF05)</label>
+        <div class="radio-group">
+          <label><input type="radio" name="ne-tipo-res" value="texto" checked onchange="togExameFormato()"> Resultado em Texto</label>
+          <label><input type="radio" name="ne-tipo-res" value="arquivo" onchange="togExameFormato()"> Arquivo Anexo</label>
+        </div>
+      </div>
+      <!-- Resultado em texto -->
+      <div id="ne-texto-section">
+        <div class="fg"><label>Resultado (texto)</label><textarea id="ne-res" placeholder="Descreva o resultado do exame..."></textarea></div>
+      </div>
+      <!-- Arquivo simulado -->
+      <div id="ne-arquivo-section" class="hidden">
+        <div class="frow">
+          <div class="fg">
+            <label>Formato do Arquivo (RNF05)</label>
+            <select id="ne-formato">
+              <option value="PDF">PDF</option>
+              <option value="IMAGEM">Imagem (JPG/PNG)</option>
+              <option value="TEXTO">Arquivo de Texto (.txt)</option>
+            </select>
+          </div>
+          <div class="fg"><label>Nome do Arquivo</label><input type="text" id="ne-nome-arq" placeholder="Ex: resultado-hemograma.pdf"></div>
+        </div>
+        <div class="fg"><label>Caminho / URL simulada</label><input type="text" id="ne-caminho" placeholder="/exames/2024/hemograma.pdf"></div>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:-.3rem;margin-bottom:.8rem">Protótipo: preencha os metadados. Em produção, o arquivo seria enviado ao servidor.</p>
+      </div>
+      <div id="ne-al"></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-exam')">Cancelar</button><button class="btn btn-primary" onclick="cadExame()">Cadastrar Exame</button></div>
+  </div>
+</div>
+
+<!-- Exames do Paciente (UC07) -->
+<div id="mo-expac" class="mo hidden">
+  <div class="modal" style="max-width:660px">
+    <div class="mh"><h3 id="mo-expac-titulo">Exames do Paciente — UC07</h3><button class="xbtn" onclick="closeMo('mo-expac')">✕</button></div>
+    <div class="mb2">
+      <div class="tw"><table><thead><tr><th>Tipo</th><th>Data</th><th>Formato</th><th>Status</th><th>Resultado</th></tr></thead><tbody id="expac-tb"></tbody></table></div>
+    </div>
+    <div class="mf"><button class="btn btn-outline" onclick="closeMo('mo-expac')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- ===================================================
+     SCRIPT
+=================================================== -->
+<script>
+const NOW = new Date().toISOString().slice(0,10);
+const YDAY = (()=>{ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); })();
+
+let db = {
+  usuarios: [
+    {id:1,nome:'Dr. Carlos Silva',cpf:'111.222.333-44',email:'carlos@medhub.com',perfil:'MEDICO',ativo:true,crm:'12345-SP',especialidade:'Cardiologia'},
+    {id:2,nome:'Dra. Ana Costa',cpf:'222.333.444-55',email:'ana@medhub.com',perfil:'MEDICO',ativo:true,crm:'67890-RJ',especialidade:'Clínica Geral'},
+    {id:3,nome:'Joana Recepcionista',cpf:'333.444.555-66',email:'joana@medhub.com',perfil:'RECEPCIONISTA',ativo:true},
+    {id:4,nome:'Admin Sistema',cpf:'444.555.666-77',email:'admin@medhub.com',perfil:'ADMINISTRADOR',ativo:true},
+  ],
+  pacientes: [
+    {id:1,nomeCompleto:'Maria Santos',cpf:'123.456.789-00',dataNascimento:'1985-03-15',telefone:'(11) 99999-1111',email:'maria@email.com',chave:'chave-maria-2024-abc'},
+    {id:2,nomeCompleto:'João Oliveira',cpf:'987.654.321-00',dataNascimento:'1990-07-22',telefone:'(11) 99999-2222',email:'joao@email.com',chave:'chave-joao-2024-xyz'},
+    {id:3,nomeCompleto:'Carla Pereira',cpf:'555.666.777-88',dataNascimento:'2000-11-05',telefone:'(11) 99999-3333',email:'carla@email.com',chave:'chave-carla-2024-def'},
+  ],
+  consultas: [
+    {id:1,pacienteId:1,medicoId:1,dataHora:NOW+'T08:30',status:'AGENDADA'},
+    {id:2,pacienteId:2,medicoId:1,dataHora:NOW+'T10:00',status:'CONFIRMADA'},
+    {id:3,pacienteId:3,medicoId:2,dataHora:NOW+'T14:30',status:'AGENDADA'},
+    {id:4,pacienteId:1,medicoId:2,dataHora:YDAY+'T09:00',status:'REALIZADA'},
+  ],
+  exames: [
+    {id:1,pacienteId:1,medicoId:1,tipo:'Hemograma Completo',dataRealizacao:'2024-05-10',resultado:'Hemoglobina 13,5 g/dL — Normal.',formato:'TEXTO',nomeArq:null,status:'DISPONIVEL'},
+    {id:2,pacienteId:2,medicoId:1,tipo:'Glicemia em Jejum',dataRealizacao:'2024-05-15',resultado:'95 mg/dL — Normal.',formato:'TEXTO',nomeArq:null,status:'DISPONIVEL'},
+    {id:3,pacienteId:1,medicoId:2,tipo:'Raio-X Tórax',dataRealizacao:'2024-05-20',resultado:null,formato:'PDF',nomeArq:'raio-x-torax.pdf',caminho:'/exames/2024/raio-x-torax.pdf',status:'DISPONIVEL'},
+    {id:4,pacienteId:3,medicoId:2,tipo:'ECG',dataRealizacao:'2024-06-01',resultado:null,formato:'IMAGEM',nomeArq:'ecg-carla.jpg',caminho:'/exames/2024/ecg-carla.jpg',status:'DISPONIVEL'},
+  ],
+  historicos: [
+    {id:1,pacienteId:1,medicoId:1,data:'2024-05-10',queixa:'Dor no peito ao esforço',diagnostico:'Angina estável leve. Indicada investigação cardíaca.',obs:'Paciente é fumante.'},
+    {id:2,pacienteId:2,medicoId:2,data:'2024-05-15',queixa:'Cansaço excessivo',diagnostico:'Síndrome da fadiga. Exames laboratoriais solicitados.',obs:''},
+  ],
+  logs: [
+    {id:1,dataHora:'2024-05-01 09:12',usrId:3,antes:'RECEPCIONISTA',depois:'ADMINISTRADOR',adminId:4},
+    {id:2,dataHora:'2024-05-03 14:35',usrId:3,antes:'ADMINISTRADOR',depois:'RECEPCIONISTA',adminId:4},
+  ],
+  nid:{u:5,p:4,c:5,e:5,h:3,l:3},
+};
+
+let selConId=null, selUsrId=null, conRole='medico';
+
+// ── HELPERS ────────────────────────────────────────
+const gPac = id => db.pacientes.find(p=>p.id==id);
+const gUsr = id => db.usuarios.find(u=>u.id==id);
+const fData = d => d ? new Date(d+'T00:00:00').toLocaleDateString('pt-BR') : '-';
+const fHora = dt => new Date(dt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const idade = d => Math.floor((Date.now()-new Date(d).getTime())/(1000*60*60*24*365.25));
+
+function bdg(txt,cls){return`<span class="badge ${cls}">${txt}</span>`}
+function bdgPerfil(p){return bdg(p,{MEDICO:'bb',RECEPCIONISTA:'bt',ADMINISTRADOR:'by'}[p]||'bt')}
+function bdgCon(s){return bdg(s,{AGENDADA:'bb',CONFIRMADA:'bg',CANCELADA:'br',REALIZADA:'bt',EM_ATENDIMENTO:'by'}[s]||'bt')}
+function bdgExame(s){return bdg(s,{DISPONIVEL:'bg',CADASTRADO:'bb',CANCELADO:'br',SOLICITADO:'by'}[s]||'bt')}
+function bdgFormato(f){return bdg(f||'TEXTO',{PDF:'br',IMAGEM:'bp',TEXTO:'bt'}[f]||'bt')}
+
+function alerta(id,msg,tipo='ok'){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=`<div class="al al-${tipo}">${msg}</div>`;
+  if(tipo==='ok')setTimeout(()=>{if(el)el.innerHTML=''},3500);
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────
+function hideAll(){
+  ['scr-landing','scr-admin','scr-recep','scr-medico','scr-portal']
+    .forEach(id=>document.getElementById(id).classList.add('hidden'));
+}
+function goHome(){hideAll();document.getElementById('scr-landing').classList.remove('hidden')}
+
+function openApp(role){
+  hideAll();
+  if(role==='portal'){
+    document.getElementById('scr-portal').classList.remove('hidden');
+    document.getElementById('p-chave').value='';
+    document.getElementById('p-al').innerHTML='';
+    const ex=document.getElementById('p-exames');if(ex)ex.remove();
+    return;
+  }
+  document.getElementById('scr-'+role).classList.remove('hidden');
+  if(role==='admin'){showSec('admin','dashboard');renderDB()}
+  if(role==='recep'){
+    // Preenche seletor de médicos na agenda da recepcionista
+    const sel=document.getElementById('r-ag-med');
+    sel.innerHTML='<option value="">Todos os médicos</option>';
+    db.usuarios.filter(u=>u.perfil==='MEDICO'&&u.ativo)
+      .forEach(m=>sel.innerHTML+=`<option value="${m.id}">${m.nome}</option>`);
+    document.getElementById('r-ag-data').valueAsDate=new Date();
+    showSec('recep','agenda');
+    renderRAgenda();
+  }
+  if(role==='medico'){
+    document.getElementById('ag-data').valueAsDate=new Date();
+    showSec('medico','agenda');renderAg();
+  }
+}
+
+const SECTION_TITLES={dashboard:'Dashboard',usuarios:'Usuários',medicos:'Médicos',
+  pacientes:'Pacientes',logs:'Logs de Perfil',agenda:'Agenda',
+  exames:'Exames',historico:'Histórico Clínico'};
+
+function showSec(role,sec){
+  document.querySelectorAll('#scr-'+role+' .sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById(role+'-'+sec).classList.add('active');
+  document.querySelectorAll('#scr-'+role+' .ni').forEach(n=>{
+    n.classList.toggle('active',n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+sec+"'"));
+  });
+  const tbarId={admin:'a-tbar',recep:'r-tbar',medico:'m-tbar'}[role];
+  if(tbarId)document.getElementById(tbarId).textContent=SECTION_TITLES[sec]||sec;
+  const renders={
+    admin:{usuarios:renderUsr,medicos:renderMed,pacientes:renderPacA,logs:renderLog},
+    recep:{agenda:renderRAgenda,pacientes:renderPacR},
+    medico:{agenda:renderAg,pacientes:renderPacM,exames:renderExame,historico:renderHist},
+  };
+  if(renders[role]&&renders[role][sec])renders[role][sec]();
+}
+
+// ── MODAIS ─────────────────────────────────────────
+function openMo(id){
+  if(id==='mo-nousr'){['nu-nome','nu-cpf','nu-email','nu-crm','nu-esp','nu-senha'].forEach(f=>{const e=document.getElementById(f);if(e)e.value=''});document.getElementById('nu-perfil').value='RECEPCIONISTA';document.getElementById('nu-al').innerHTML='';togMedFld()}
+  if(id==='mo-altperfil'){const sel=document.getElementById('ap-admin');sel.innerHTML='';db.usuarios.filter(u=>u.perfil==='ADMINISTRADOR'&&u.ativo).forEach(a=>{sel.innerHTML+=`<option value="${a.id}">${a.nome}</option>`});document.getElementById('ap-al').innerHTML=''}
+  if(id==='mo-nopac'){['np-nome','np-cpf','np-nasc','np-tel','np-email'].forEach(f=>{const e=document.getElementById(f);if(e)e.value=''});document.getElementById('np-al').innerHTML=''}
+  if(id==='mo-exam'){
+    const s=document.getElementById('ne-pac');s.innerHTML='<option value="">Selecione...</option>';
+    db.pacientes.forEach(p=>s.innerHTML+=`<option value="${p.id}">${p.nomeCompleto}</option>`);
+    ['ne-tipo','ne-res','ne-nome-arq','ne-caminho'].forEach(f=>{const e=document.getElementById(f);if(e)e.value=''});
+    document.getElementById('ne-data').valueAsDate=new Date();
+    document.getElementById('ne-formato').value='PDF';
+    document.querySelector('input[name="ne-tipo-res"][value="texto"]').checked=true;
+    togExameFormato();
+    document.getElementById('ne-al').innerHTML='';
+  }
+  document.getElementById(id).classList.remove('hidden');
+}
+function closeMo(id){document.getElementById(id).classList.add('hidden')}
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeMo(this.id)}));
+function togMedFld(){document.getElementById('med-flds').classList.toggle('hidden',document.getElementById('nu-perfil').value!=='MEDICO')}
+function togExameFormato(){
+  const v=document.querySelector('input[name="ne-tipo-res"]:checked').value;
+  document.getElementById('ne-texto-section').classList.toggle('hidden',v==='arquivo');
+  document.getElementById('ne-arquivo-section').classList.toggle('hidden',v==='texto');
+}
+
+// ── DASHBOARD ──────────────────────────────────────
+function renderDB(){
+  document.getElementById('st-usr').textContent=db.usuarios.length;
+  document.getElementById('st-med').textContent=db.usuarios.filter(u=>u.perfil==='MEDICO'&&u.ativo).length;
+  document.getElementById('st-pac').textContent=db.pacientes.length;
+  document.getElementById('st-con').textContent=db.consultas.filter(c=>c.dataHora.startsWith(NOW)).length;
+  const tb=document.getElementById('db-logs');
+  tb.innerHTML=[...db.logs].reverse().slice(0,5).map(l=>{
+    const u=gUsr(l.usrId),a=gUsr(l.adminId);
+    return`<tr><td>${l.dataHora}</td><td>${u?u.nome:'-'}</td><td>${l.antes} → ${l.depois}</td><td>${a?a.nome:'-'}</td></tr>`;
+  }).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted)">Sem registros</td></tr>';
+}
+
+// ── USUÁRIOS ───────────────────────────────────────
+function renderUsr(){
+  const t=(document.getElementById('s-usr')?.value||'').toLowerCase();
+  const p=document.getElementById('f-perfil')?.value||'';
+  const tb=document.getElementById('usr-tb');if(!tb)return;
+  const r=db.usuarios.filter(u=>(!t||u.nome.toLowerCase().includes(t)||u.email.toLowerCase().includes(t))&&(!p||u.perfil===p));
+  tb.innerHTML=r.map(u=>`<tr><td><strong>${u.nome}</strong></td><td>${u.email}</td><td>${bdgPerfil(u.perfil)}</td><td>${bdg(u.ativo?'Ativo':'Inativo',u.ativo?'bg':'br')}</td><td style="display:flex;gap:.35rem;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="abrirAltPerfil(${u.id})">Alterar Perfil</button><button class="btn btn-sm ${u.ativo?'btn-danger':'btn-success'}" onclick="togAtivo(${u.id})">${u.ativo?'Desativar':'Ativar'}</button></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum usuário encontrado</td></tr>';
+}
+
+function cadUsr(){
+  const nome=document.getElementById('nu-nome').value.trim();
+  const cpf=document.getElementById('nu-cpf').value.trim();
+  const email=document.getElementById('nu-email').value.trim();
+  const perfil=document.getElementById('nu-perfil').value;
+  const senha=document.getElementById('nu-senha').value;
+  if(!nome||!cpf||!email||!senha)return alerta('nu-al','Preencha todos os campos obrigatórios.','err');
+  if(db.usuarios.find(u=>u.cpf===cpf))return alerta('nu-al','CPF já cadastrado.','err');
+  if(db.usuarios.find(u=>u.email===email))return alerta('nu-al','E-mail já cadastrado.','err');
+  let extra={};
+  if(perfil==='MEDICO'){
+    const crm=document.getElementById('nu-crm').value.trim();
+    const esp=document.getElementById('nu-esp').value.trim();
+    if(!crm||!esp)return alerta('nu-al','CRM e Especialidade são obrigatórios para médico.','err');
+    if(db.usuarios.find(u=>u.crm===crm))return alerta('nu-al','CRM já cadastrado.','err');
+    extra={crm,especialidade:esp};
+  }
+  db.usuarios.push({id:db.nid.u++,nome,cpf,email,perfil,ativo:true,...extra});
+  closeMo('mo-nousr');renderUsr();renderDB();
+}
+
+function abrirAltPerfil(uid){
+  selUsrId=uid;const u=gUsr(uid);
+  document.getElementById('ap-info').textContent=`Usuário: ${u.nome} — Perfil atual: ${u.perfil}`;
+  document.getElementById('ap-perfil').value=u.perfil;
+  openMo('mo-altperfil');
+}
+function salvaPerfil(){
+  const u=gUsr(selUsrId),novo=document.getElementById('ap-perfil').value;
+  const adm=parseInt(document.getElementById('ap-admin').value);
+  if(u.perfil==='ADMINISTRADOR'&&novo!=='ADMINISTRADOR'){
+    if(db.usuarios.filter(x=>x.perfil==='ADMINISTRADOR'&&x.ativo).length<=1)
+      return alerta('ap-al','Não é possível remover o último administrador ativo (RN09).','err');
+  }
+  const antes=u.perfil;u.perfil=novo;
+  db.logs.push({id:db.nid.l++,dataHora:new Date().toLocaleString('pt-BR'),usrId:u.id,antes,depois:novo,adminId:adm});
+  closeMo('mo-altperfil');renderUsr();renderDB();
+}
+function togAtivo(uid){const u=gUsr(uid);u.ativo=!u.ativo;renderUsr();renderDB()}
+
+// ── MÉDICOS ────────────────────────────────────────
+function renderMed(){
+  const t=(document.getElementById('s-med')?.value||'').toLowerCase();
+  const tb=document.getElementById('med-tb');if(!tb)return;
+  const r=db.usuarios.filter(u=>u.perfil==='MEDICO'&&(!t||u.nome.toLowerCase().includes(t)||(u.especialidade||'').toLowerCase().includes(t)));
+  tb.innerHTML=r.map(m=>`<tr><td><strong>${m.nome}</strong></td><td>${m.crm||'-'}</td><td>${m.especialidade||'-'}</td><td>${bdg(m.ativo?'Ativo':'Inativo',m.ativo?'bg':'br')}</td><td><button class="btn btn-sm ${m.ativo?'btn-danger':'btn-success'}" onclick="togAtivo(${m.id})">${m.ativo?'Desativar':'Ativar'}</button></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum médico</td></tr>';
+}
+
+// ── PACIENTES (admin) ──────────────────────────────
+function renderPacA(){
+  const t=(document.getElementById('s-pac-a')?.value||'').toLowerCase();
+  const tb=document.getElementById('pac-a-tb');if(!tb)return;
+  tb.innerHTML=db.pacientes.filter(p=>!t||p.nomeCompleto.toLowerCase().includes(t)||p.cpf.includes(t)).map(p=>`<tr><td><strong>${p.nomeCompleto}</strong></td><td>${p.cpf}</td><td>${fData(p.dataNascimento)}</td><td>${p.telefone}</td><td><code style="font-size:.72rem;background:var(--bg);padding:.15rem .4rem;border-radius:.3rem">${p.chave}</code></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum paciente</td></tr>';
+}
+
+function cadPac(){
+  const nome=document.getElementById('np-nome').value.trim();
+  const cpf=document.getElementById('np-cpf').value.trim();
+  const nasc=document.getElementById('np-nasc').value;
+  const tel=document.getElementById('np-tel').value.trim();
+  const email=document.getElementById('np-email').value.trim();
+  if(!nome||!cpf||!nasc||!tel)return alerta('np-al','Preencha os campos obrigatórios.','err');
+  if(db.pacientes.find(p=>p.cpf===cpf))return alerta('np-al','CPF já cadastrado.','err');
+  const chave='chave-'+Math.random().toString(36).slice(2,10);
+  db.pacientes.push({id:db.nid.p++,nomeCompleto:nome,cpf,dataNascimento:nasc,telefone:tel,email,chave});
+  closeMo('mo-nopac');
+  renderPacA();renderPacR();renderDB();
+}
+
+// ── LOGS ───────────────────────────────────────────
+function renderLog(){
+  const tb=document.getElementById('log-tb');if(!tb)return;
+  tb.innerHTML=[...db.logs].reverse().map(l=>{
+    const u=gUsr(l.usrId),a=gUsr(l.adminId);
+    return`<tr><td>${l.dataHora}</td><td>${u?u.nome:'-'}</td><td>${bdgPerfil(l.antes)}</td><td>${bdgPerfil(l.depois)}</td><td>${a?a.nome:'-'}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum log</td></tr>';
+}
+
+// ── PACIENTES (recepcionista — UC01 view) ──────────
+function renderPacR(){
+  const t=(document.getElementById('s-pac-r')?.value||'').toLowerCase();
+  const tb=document.getElementById('pac-r-tb');if(!tb)return;
+  tb.innerHTML=db.pacientes.filter(p=>!t||p.nomeCompleto.toLowerCase().includes(t)||p.cpf.includes(t)).map(p=>`<tr><td><strong>${p.nomeCompleto}</strong></td><td>${p.cpf}</td><td>${fData(p.dataNascimento)}</td><td>${p.telefone}</td><td>${p.email||'-'}</td><td><button class="btn btn-primary btn-sm" onclick="openConModal('recep',${p.id})">Agendar</button></td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted)">Nenhum paciente</td></tr>';
+}
+
+// ── AGENDA RECEPCIONISTA (UC04 — todos os médicos) ─
+function renderRAgenda(){
+  const medId=document.getElementById('r-ag-med')?.value||'';
+  const data=document.getElementById('r-ag-data')?.value||NOW;
+  const stFlt=document.getElementById('r-ag-status')?.value||'';
+  const list=document.getElementById('r-ag-list');if(!list)return;
+  const cons=db.consultas.filter(c=>
+    c.dataHora.startsWith(data)&&
+    (!medId||c.medicoId==medId)&&
+    (!stFlt||c.status===stFlt)
+  ).sort((a,b)=>a.dataHora.localeCompare(b.dataHora));
+  if(!cons.length){list.innerHTML='<div class="al al-info">Nenhuma consulta para esta data.</div>';return}
+  list.innerHTML=cons.map(c=>{
+    const p=gPac(c.pacienteId),m=gUsr(c.medicoId);
+    const h=fHora(c.dataHora).split(':');
+    const btn=c.status!=='CANCELADA'&&c.status!=='REALIZADA'?`<button class="btn btn-danger btn-sm" onclick="abrirCancel(${c.id})">Cancelar</button>`:'';
+    return`<div class="ci"><div class="ct"><div class="ch">${h[0]}</div><div class="cm">${h[1]}h</div></div><div style="flex:1"><div style="font-weight:600">${p?p.nomeCompleto:'Paciente'}</div><div style="font-size:.78rem;color:var(--muted)">Dr(a). ${m?m.nome:'Médico'}${m&&m.especialidade?' — '+m.especialidade:''}</div></div><div style="display:flex;align-items:center;gap:.5rem">${bdgCon(c.status)}${btn}</div></div>`;
+  }).join('');
+}
+
+// ── AGENDA MÉDICO (UC04 — só sua) ─────────────────
+function renderAg(){
+  const data=document.getElementById('ag-data')?.value||NOW;
+  const stFlt=document.getElementById('ag-status')?.value||'';
+  const list=document.getElementById('ag-list');if(!list)return;
+  const cons=db.consultas.filter(c=>c.medicoId===1&&c.dataHora.startsWith(data)&&(!stFlt||c.status===stFlt)).sort((a,b)=>a.dataHora.localeCompare(b.dataHora));
+  if(!cons.length){list.innerHTML='<div class="al al-info">Nenhuma consulta para esta data.</div>';return}
+  list.innerHTML=cons.map(c=>{
+    const p=gPac(c.pacienteId);
+    const h=fHora(c.dataHora).split(':');
+    const btn=c.status!=='CANCELADA'&&c.status!=='REALIZADA'?`<button class="btn btn-danger btn-sm" onclick="abrirCancel(${c.id})">Cancelar</button>`:'';
+    return`<div class="ci"><div class="ct"><div class="ch">${h[0]}</div><div class="cm">${h[1]}h</div></div><div style="flex:1"><div style="font-weight:600">${p?p.nomeCompleto:'Paciente'}</div></div><div style="display:flex;align-items:center;gap:.5rem">${bdgCon(c.status)}${btn}</div></div>`;
+  }).join('');
+}
+
+// ── AGENDAR CONSULTA (UC02) ────────────────────────
+function openConModal(role, pacId){
+  conRole=role;
+  const sPac=document.getElementById('nc-pac');
+  sPac.innerHTML='<option value="">Selecione...</option>';
+  db.pacientes.forEach(p=>sPac.innerHTML+=`<option value="${p.id}">${p.nomeCompleto}</option>`);
+  if(pacId)sPac.value=pacId;
+
+  // Médico selector: recepcionista escolhe; médico tem fixo
+  const sMed=document.getElementById('nc-med');
+  const medRow=document.getElementById('nc-med-row');
+  sMed.innerHTML='<option value="">Selecione...</option>';
+  db.usuarios.filter(u=>u.perfil==='MEDICO'&&u.ativo).forEach(m=>sMed.innerHTML+=`<option value="${m.id}">${m.nome} — ${m.especialidade}</option>`);
+  if(role==='medico'){sMed.value='1';medRow.style.display='none';}
+  else{medRow.style.display='';}
+
+  document.getElementById('nc-data').valueAsDate=new Date();
+  document.getElementById('nc-hora').value='08:00';
+  document.getElementById('nc-al').innerHTML='';
+  openMo('mo-con');
+}
+
+function agendarCon(){
+  const pid=parseInt(document.getElementById('nc-pac').value);
+  const data=document.getElementById('nc-data').value;
+  const hora=document.getElementById('nc-hora').value;
+  const mid=parseInt(document.getElementById('nc-med').value);
+  if(!pid||!data||!hora)return alerta('nc-al','Preencha todos os campos.','err');
+  if(!mid)return alerta('nc-al','Selecione um médico.','err');
+  const m=gUsr(mid);
+  if(m&&!m.ativo)return alerta('nc-al','Não é possível agendar para um médico inativo.','err');
+  const dh=data+'T'+hora;
+  if(db.consultas.find(c=>c.medicoId===mid&&c.dataHora===dh&&c.status!=='CANCELADA'))
+    return alerta('nc-al','Conflito de horário: já existe consulta nesse horário para este médico (RN02).','err');
+  db.consultas.push({id:db.nid.c++,pacienteId:pid,medicoId:mid,dataHora:dh,status:'AGENDADA'});
+  closeMo('mo-con');
+  if(conRole==='recep')renderRAgenda(); else renderAg();
+  renderDB();
+}
+
+// ── CANCELAR CONSULTA (UC03) ───────────────────────
+function abrirCancel(cid){
+  selConId=cid;
+  const c=db.consultas.find(x=>x.id===cid);
+  const p=gPac(c.pacienteId),m=gUsr(c.medicoId);
+  document.getElementById('cc-info').textContent=`Paciente: ${p?p.nomeCompleto:'-'} | Dr(a). ${m?m.nome:'-'} | ${fHora(c.dataHora)}`;
+  document.getElementById('cc-motivo').value='';
+  document.getElementById('cc-al').innerHTML='';
+  openMo('mo-cancel');
+}
+function confCancel(){
+  const mot=document.getElementById('cc-motivo').value.trim();
+  if(!mot)return alerta('cc-al','O motivo do cancelamento é obrigatório (RN06).','err');
+  db.consultas.find(c=>c.id===selConId).status='CANCELADA';
+  closeMo('mo-cancel');
+  renderRAgenda();renderAg();
+}
+
+// ── PACIENTES MÉDICO (UC07) ────────────────────────
+function renderPacM(){
+  const t=(document.getElementById('s-pac-m')?.value||'').toLowerCase();
+  const tb=document.getElementById('pac-m-tb');if(!tb)return;
+  tb.innerHTML=db.pacientes.filter(p=>!t||p.nomeCompleto.toLowerCase().includes(t)||p.cpf.includes(t)).map(p=>`<tr><td><strong>${p.nomeCompleto}</strong></td><td>${p.cpf}</td><td>${idade(p.dataNascimento)} anos</td><td>${p.telefone}</td><td style="display:flex;gap:.35rem"><button class="btn btn-outline btn-sm" onclick="verExamesPac(${p.id})">Ver Exames</button><button class="btn btn-primary btn-sm" onclick="openConModal('medico',${p.id})">Consulta</button></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum paciente</td></tr>';
+}
+
+function verExamesPac(pid){
+  const p=gPac(pid);
+  document.getElementById('mo-expac-titulo').textContent='Exames — '+p.nomeCompleto+' (UC07)';
+  const tb=document.getElementById('expac-tb');
+  const exames=db.exames.filter(e=>e.pacienteId==pid);
+  tb.innerHTML=exames.map(e=>`<tr><td>${e.tipo}</td><td>${fData(e.dataRealizacao)}</td><td>${bdgFormato(e.formato)}</td><td>${bdgExame(e.status)}</td><td style="max-width:180px">${e.nomeArq?`<span style="font-size:.78rem">📎 ${e.nomeArq}</span>`:(e.resultado?`<span style="font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block" title="${e.resultado}">${e.resultado}</span>`:'-')}</td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sem exames</td></tr>';
+  openMo('mo-expac');
+}
+
+// ── EXAMES (UC06) ──────────────────────────────────
+function renderExame(){
+  const tb=document.getElementById('exam-tb');if(!tb)return;
+  tb.innerHTML=db.exames.map(e=>{
+    const p=gPac(e.pacienteId);
+    const resultHtml=e.nomeArq?`📎 ${e.nomeArq}`:(e.resultado?`<span style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block" title="${e.resultado}">${e.resultado}</span>`:'-');
+    return`<tr><td><strong>${e.tipo}</strong></td><td>${p?p.nomeCompleto:'-'}</td><td>${fData(e.dataRealizacao)}</td><td>${bdgFormato(e.formato)}</td><td>${bdgExame(e.status)}</td><td>${resultHtml}</td></tr>`;
+  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted)">Nenhum exame</td></tr>';
+}
+
+function cadExame(){
+  const pid=parseInt(document.getElementById('ne-pac').value);
+  const tipo=document.getElementById('ne-tipo').value.trim();
+  const data=document.getElementById('ne-data').value;
+  const tipoRes=document.querySelector('input[name="ne-tipo-res"]:checked').value;
+  if(!pid||!tipo||!data)return alerta('ne-al','Preencha os campos obrigatórios.','err');
+
+  let extra={};
+  if(tipoRes==='texto'){
+    const res=document.getElementById('ne-res').value.trim();
+    if(!res)return alerta('ne-al','Informe o resultado em texto.','err');
+    extra={resultado:res,formato:'TEXTO',nomeArq:null};
+  } else {
+    const fmt=document.getElementById('ne-formato').value;
+    const nome=document.getElementById('ne-nome-arq').value.trim();
+    const cam=document.getElementById('ne-caminho').value.trim();
+    if(!nome||!cam)return alerta('ne-al','Informe o nome e o caminho do arquivo.','err');
+    extra={resultado:null,formato:fmt,nomeArq:nome,caminho:cam};
+  }
+  db.exames.push({id:db.nid.e++,pacienteId:pid,medicoId:1,tipo,dataRealizacao:data,...extra,status:'DISPONIVEL'});
+  closeMo('mo-exam');renderExame();
+}
+
+// ── HISTÓRICO CLÍNICO (UC05) ───────────────────────
+function renderHist(){
+  const sel=document.getElementById('hc-pac');
+  if(sel&&sel.options.length<=1)db.pacientes.forEach(p=>sel.innerHTML+=`<option value="${p.id}">${p.nomeCompleto}</option>`);
+  const di=document.getElementById('hc-data');if(di&&!di.value)di.valueAsDate=new Date();
+  const tb=document.getElementById('hc-tb');if(!tb)return;
+  tb.innerHTML=db.historicos.map(h=>{
+    const p=gPac(h.pacienteId);
+    return`<tr><td>${fData(h.data)}</td><td>${p?p.nomeCompleto:'-'}</td><td>${h.queixa}</td><td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${h.diagnostico}">${h.diagnostico}</td></tr>`;
+  }).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted)">Nenhum histórico</td></tr>';
+}
+
+function regHistorico(){
+  const pid=parseInt(document.getElementById('hc-pac').value);
+  const data=document.getElementById('hc-data').value;
+  const queixa=document.getElementById('hc-queixa').value.trim();
+  const diag=document.getElementById('hc-diag').value.trim();
+  const obs=document.getElementById('hc-obs').value.trim();
+  if(!pid||!data||!queixa||!diag)return alerta('hc-al','Preencha todos os campos obrigatórios.','err');
+  db.historicos.push({id:db.nid.h++,pacienteId:pid,medicoId:1,data,queixa,diagnostico:diag,obs});
+  document.getElementById('hc-queixa').value='';
+  document.getElementById('hc-diag').value='';
+  document.getElementById('hc-obs').value='';
+  alerta('hc-al','Histórico clínico registrado com sucesso!','ok');
+  renderHist();
+}
+
+// ── PORTAL PACIENTE (UC08) ─────────────────────────
+function consultarChave(){
+  const chave=document.getElementById('p-chave').value.trim();
+  const alertEl=document.getElementById('p-al');
+  if(!chave){alertEl.innerHTML='<div class="al al-err">Informe a chave de acesso.</div>';return}
+  const pac=db.pacientes.find(p=>p.chave===chave);
+  if(!pac){alertEl.innerHTML='<div class="al al-err">Chave inválida ou expirada (RN05). Consulte a recepção para obter uma nova chave.</div>';return}
+  alertEl.innerHTML='';
+  const exames=db.exames.filter(e=>e.pacienteId===pac.id&&(e.status==='DISPONIVEL'||e.status==='CADASTRADO'));
+  const ex=document.getElementById('p-exames');if(ex)ex.remove();
+  const sec=document.createElement('div');sec.id='p-exames';
+  let examesHtml='';
+  if(!exames.length){
+    examesHtml='<div class="al al-info">Nenhum exame disponível no momento.</div>';
+  } else {
+    examesHtml=exames.map(e=>`
+      <div class="exame-card">
+        <div class="exame-card-header">
+          <strong style="color:var(--pd)">${e.tipo}</strong>
+          <div style="display:flex;gap:.4rem">${bdgFormato(e.formato)}${bdgExame(e.status)}</div>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted)">Data de realização: ${fData(e.dataRealizacao)}</div>
+        ${e.resultado?`<div class="exame-resultado">${e.resultado}</div>`:''}
+        ${e.nomeArq?`<div class="exame-arquivo">📎 <strong>${e.nomeArq}</strong> <span style="color:var(--muted)">(${e.formato})</span></div>`:''}
+      </div>
+    `).join('');
+  }
+  sec.innerHTML=`
+    <div class="al al-ok">Bem-vinda(o), <strong>${pac.nomeCompleto}</strong>! Exibindo apenas seus exames.</div>
+    <p style="font-weight:700;margin:.9rem 0 .65rem;color:var(--pd)">Seus Exames Disponíveis (${exames.length})</p>
+    ${examesHtml}
+    <div style="text-align:center;margin-top:1rem">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('p-exames').remove();document.getElementById('p-chave').value=''">Nova Consulta</button>
+    </div>`;
+  document.getElementById('pb').appendChild(sec);
+}
+</script>
+</body>
+</html>
